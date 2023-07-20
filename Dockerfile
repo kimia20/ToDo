@@ -1,6 +1,7 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/runtime:7.0 AS base
 WORKDIR /src
 COPY ["src/WebEndpoints.ToDo.Api/WebEndpoints.ToDo.Api.csproj","src/WebEndpoints.ToDo.Api/"]
-RUN dotnet build "WebEndpoints.ToDo.Api.csproj" -c Release -o /app/build
+WORKDIR /publish
+COPY ["src/WebEndpoints.ToDo.Api/","/publish"]
+RUN dotnet publish -c Release -o /publish
 ENTRYPOINT ["dotnet", "WebEndpoints.ToDo.Api.dll"]

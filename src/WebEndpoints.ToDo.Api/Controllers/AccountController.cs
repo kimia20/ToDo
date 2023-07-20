@@ -11,6 +11,8 @@ using System.Security.Claims;
 using System.Text;
 using ToDo.Domain.Common;
 using ToDo.Domain.CustomerAggregate.Dto;
+using ToDo.Domain.UserAggregate.Dto;
+using WebEndpoints.ToDo.Api.ViewModels.Account;
 
 namespace WebEndpoints.ToDo.Api.Controllers
 {
@@ -41,11 +43,11 @@ namespace WebEndpoints.ToDo.Api.Controllers
         [ProducesResponseType(typeof(ErrorDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [SwaggerOperation("Login")]
-        public async Task<IActionResult> Login(string userName, string password)
+        public async Task<IActionResult> Login(SigninViewModel model)
         {
-            var user = await _repository.FindByUserName(userName);
-            if (user == null) { return BadRequest("user not found"); }
-            var checkPassword = await _repository.PasswordSignIn(userName, password, false);
+            var user = await _repository.FindByUserName(model.UserName);
+            if (user == null) { return BadRequest(new { message = "user not found" }); }
+            var checkPassword = await _repository.PasswordSignIn(model.UserName, model.Password, false);
             if (checkPassword.Success)
             {
                 var userRoles = await _repository.GetUserRoles(user.Id);
@@ -66,10 +68,14 @@ namespace WebEndpoints.ToDo.Api.Controllers
                 return Ok(new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                    expiration = token.ValidTo,
+                    isSuccess=true
                 });
             }
-            return Unauthorized();
+            return BadRequest(new
+            {
+                message="username or password is wrong"
+            });
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)
@@ -85,6 +91,19 @@ namespace WebEndpoints.ToDo.Api.Controllers
                 );
 
             return token;
+        }
+
+
+        [HttpGet("CurrentUserInfo")]
+        public async Task<CurrentUser> CurrentUserInfo()
+        {
+            return  new CurrentUser
+            {
+                IsAuthenticated = User.Identity.IsAuthenticated,
+                UserName = User.Identity.Name,
+                Claims = User.Claims
+                .ToDictionary(c => c.Type, c => c.Value)
+            };
         }
     }
 
