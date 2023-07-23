@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject WebEndpoints.ToDo.UI.Services.CustomStateProvider AuthState
+@inject IJSRuntime jsr
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -17,22 +19,46 @@
     </main>
 </div>
 @code {
+    string userdata;
 
+    private async Task<string> GetJWT()
+    {
+        userdata = await jsr.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(userdata))
+        {
+            var dataArray = userdata.Split(';', 2);
+            if (dataArray.Length == 2)
+                return dataArray[1];
+        }
+        return null;
+    }
 
-     protected async override Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
         base.OnInitialized();
         try
         {
-            var user = (await AuthState.GetAuthenticationStateAsync())?.User;
-            if (user == null)
+            var result = await GetJWT();
+            if (result == null)
+            {
+                //Console.WriteLine($"{user.Identity.IsAuthenticated}");
+                NavigationManager.NavigateTo($"/login");
+              
+            }
+            else
             {
                 Console.WriteLine("My debug output.");
             }
-            if (!user.Identity.IsAuthenticated)
-            {
-                NavigationManager.NavigateTo($"/login");
-            }
+            //var user = (await AuthState.GetAuthenticationStateAsync())?.User;
+            //if (user == null)
+            //{
+               
+            //}
+            //if (!user.Identity.IsAuthenticated)
+            //{
+                
+                
+            //}
         }
         catch (Exception ex)
         {

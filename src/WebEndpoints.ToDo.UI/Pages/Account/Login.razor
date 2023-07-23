@@ -9,6 +9,7 @@
     Login
 </h1>
 <p>@error</p>
+<div class="container" >
 <EditForm class="form-signin" OnValidSubmit="OnSubmit" Model="loginRequest">
     <DataAnnotationsValidator />
     <label for="inputUsername" class="sr-only">User Name</label>
@@ -23,6 +24,7 @@
         <h6 class="font-weight-normal text-center">Create account</h6>
     </NavLink>
 </EditForm>
+</div>
 @code {
     LoginRequest loginRequest { get; set; } = new LoginRequest();
     string error { get; set; }
@@ -35,7 +37,7 @@
             if (result.issuccess)
             {
                 await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.expiration};{result.token}").ConfigureAwait(false);
-                navigationManager.NavigateTo("");
+                navigationManager.NavigateTo("/");
             }
             else
             {
