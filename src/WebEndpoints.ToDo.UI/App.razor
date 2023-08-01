@@ -1,5 +1,7 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿<link href="~/css/app.css" rel="stylesheet" />
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
+
         @*<AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />*@
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -11,3 +13,9 @@
         </LayoutView>
     </NotFound>
 </Router>
+    
+<style>
+    html, body {
+        height: 100%;
+    }
+</style>

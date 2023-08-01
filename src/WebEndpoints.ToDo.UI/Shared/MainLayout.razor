@@ -1,7 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Blazored.LocalStorage;
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject WebEndpoints.ToDo.UI.Services.CustomStateProvider AuthState
-@inject IJSRuntime jsr
+@inject ILocalStorageService _localStorageService;
 
 <div class="page">
     <div class="sidebar">
@@ -23,12 +24,10 @@
 
     private async Task<string> GetJWT()
     {
-        userdata = await jsr.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+        userdata = await _localStorageService.GetItemAsStringAsync("jwt-access-token");
         if (!string.IsNullOrWhiteSpace(userdata))
         {
-            var dataArray = userdata.Split(';', 2);
-            if (dataArray.Length == 2)
-                return dataArray[1];
+            return userdata;
         }
         return null;
     }
@@ -39,26 +38,8 @@
         try
         {
             var result = await GetJWT();
-            if (result == null)
-            {
-                //Console.WriteLine($"{user.Identity.IsAuthenticated}");
-                NavigationManager.NavigateTo($"/login");
-              
-            }
-            else
-            {
-                Console.WriteLine("My debug output.");
-            }
-            //var user = (await AuthState.GetAuthenticationStateAsync())?.User;
-            //if (user == null)
-            //{
-               
-            //}
-            //if (!user.Identity.IsAuthenticated)
-            //{
-                
-                
-            //}
+            if (result == null) NavigationManager.NavigateTo($"/login");
+            else NavigationManager.NavigateTo($"/");
         }
         catch (Exception ex)
         {

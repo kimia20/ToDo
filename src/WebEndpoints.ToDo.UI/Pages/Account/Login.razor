@@ -1,8 +1,11 @@
 ﻿@page "/login"
+@using Blazored.LocalStorage;
 @using WebEndpoints.ToDo.UI.Models;
-@layout LoginLayout
+@layout LoginLayout;
 @inject NavigationManager navigationManager
-@inject IJSRuntime jsr
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILocalStorageService _localStorageService;
 @inject WebEndpoints.ToDo.UI.Services.CustomStateProvider authStateProvider
 
 <h1 class="h2 font-weight-normal login-title">
@@ -26,8 +29,18 @@
 </EditForm>
 </div>
 @code {
+    //[CascadingParameter]
+    //private Task<AuthenticationState> AuthenticationStateProvider { get; set; }
     LoginRequest loginRequest { get; set; } = new LoginRequest();
     string error { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+       // var authState = await authenticationState;
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated) navigationManager.NavigateTo("/", true);
+    }
+  
     async Task OnSubmit()
     {
         error = null;
@@ -36,7 +49,8 @@
             var result=await authStateProvider.Login(loginRequest);
             if (result.issuccess)
             {
-                await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.expiration};{result.token}").ConfigureAwait(false);
+                await _localStorageService.SetItemAsync("jwt-access-token", result.token);
+                //await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.expiration};{result.token}").ConfigureAwait(false);
                 navigationManager.NavigateTo("/");
             }
             else

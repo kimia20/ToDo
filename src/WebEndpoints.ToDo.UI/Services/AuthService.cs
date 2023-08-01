@@ -1,4 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http.Json;
+using System.Security.Claims;
 using ToDo.Domain.UserAggregate.Dto;
 using WebEndpoints.ToDo.UI.Models;
 using WebEndpoints.ToDo.UI.Services.Contract;
@@ -6,11 +9,14 @@ namespace WebEndpoints.ToDo.UI.Services
 {
     public class AuthService : IAuthService
     {
+        
         private readonly HttpClient _httpClient;
         public AuthService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            
         }
+       
         public async Task<CurrentUser> CurrentUserInfo()
         {
             var result = await _httpClient.GetFromJsonAsync<CurrentUser>("api/Account/CurrentUserInfo");
