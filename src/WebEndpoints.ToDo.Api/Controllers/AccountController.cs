@@ -93,6 +93,32 @@ namespace WebEndpoints.ToDo.Api.Controllers
             return token;
         }
 
+        private bool ValidateToken(string token)
+        {
+            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["JWT:Secret"]));
+            var myIssuer = _configuration["JWT:ValidIssuer"];
+            var myAudience = _configuration["JWT:ValidAudience"];
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = myIssuer,
+                    ValidAudience = myAudience,
+                    IssuerSigningKey = mySecurityKey
+                }, out SecurityToken validatedToken);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
 
         [HttpGet("CurrentUserInfo")]
         public async Task<CurrentUser> CurrentUserInfo()
